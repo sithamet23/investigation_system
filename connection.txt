@@ -112,16 +112,13 @@ def set_sqlite_pragma(dbapi_connection, connection_record):
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
-# database/connection.py (แก้ไขเฉพาะบล็อกฟังก์ชัน init_database ช่วงท้ายไฟล์)
-
-
 def init_database():
     """สร้างตารางและสร้างข้อมูลชุดเริ่มต้นสำหรับการทดสอบระบบ"""
     Base.metadata.create_all(bind=engine)
 
     db = SessionLocal()
     try:
-        # 1. ตรวจสอบและใส่ข้อมูล Seed Data ผู้ใช้เริ่มต้น (รหัสผ่าน 1234)
+        # ใส่ข้อมูล Seed Data ผู้ใช้เริ่มต้น (รหัสผ่าน 1234)
         if db.query(User).count() == 0:
             default_user = User(
                 username="voranan_s",
@@ -134,66 +131,55 @@ def init_database():
             db.commit()
             db.refresh(default_user)
 
-        # 📌 [แก้ไขการเยื้องโค้ด]: ขยับบล็อกเงื่อนไขของ Warrant ออกมาทางซ้าย 1 ระดับ (ให้อยู่ระดับเดียวกับ if ของ User)
-        # ดึงอ้างอิงของแอดมินคนแรกมารองรับการผูกค่าสิทธิ์ Foreign Key
-        default_user = db.query(User).filter(User.username == "voranan_s").first()
+            # ใส่ข้อมูล Seed Data หมายจับ
+            if db.query(Warrant).count() == 0:
+                mock_warrants = [
+                    Warrant(
+                        warrant_number="มจ.145/2569",
+                        issue_date_th="10 ก.ย. 2569",
+                        expiry_date_th="10 ก.ย. 2579",
+                        suspect_name="นายสมชาย ใจกล้า",
+                        status="ยังไม่พบตัว",
+                        created_by=default_user.user_id,
+                    ),
+                    Warrant(
+                        warrant_number="มจ.202/2569",
+                        issue_date_th="05 ก.ย. 2569",
+                        expiry_date_th="05 ก.ย. 2574",
+                        suspect_name="นายอภิชาติ มาเยอะ",
+                        status="จับกุมแล้ว",
+                        created_by=default_user.user_id,
+                    ),
+                    Warrant(
+                        warrant_number="มจ.88/2569",
+                        issue_date_th="22 ส.ค. 2569",
+                        expiry_date_th="22 ส.ค. 2579",
+                        suspect_name="นางสาวสมศรี มีสุข",
+                        status="ยังไม่พบตัว",
+                        created_by=default_user.user_id,
+                    ),
+                ]
+                db.add_all(mock_warrants)
 
-        # 2. ตรวจสอบและใส่ข้อมูล Seed Data หมายจับ
-        if db.query(Warrant).count() == 0 and default_user:
-            mock_warrants = [
-                Warrant(
-                    warrant_number="มจ.145/2569",
-                    issue_date_th="10 ก.ย. 2569",
-                    expiry_date_th="10 ก.ย. 2579",
-                    suspect_name="นายสมชาย ใจกล้า",
-                    status="ยังไม่พบตัว",
-                    created_by=default_user.user_id,
-                ),
-                Warrant(
-                    warrant_number="มจ.202/2569",
-                    issue_date_th="05 ก.ย. 2569",
-                    expiry_date_th="05 ก.ย. 2574",
-                    suspect_name="นายอภิชาติ มาเยอะ",
-                    status="จับกุมแล้ว",
-                    created_by=default_user.user_id,
-                ),
-                Warrant(
-                    warrant_number="มจ.88/2569",
-                    issue_date_th="22 ส.ค. 2569",
-                    expiry_date_th="22 ส.ค. 2579",
-                    suspect_name="นางสาวสมศรี มีสุข",
-                    status="ยังไม่พบตัว",
-                    created_by=default_user.user_id,
-                ),
-            ]
-            db.add_all(mock_warrants)
-
-        # 📌 [แก้ไขการเยื้องโค้ด]: ขยับบล็อกเงื่อนไขของ CaseFile ออกมาทางซ้าย 1 ระดับเช่นเดียวกัน
-        # 3. ตรวจสอบและใส่ข้อมูล Seed Data สำนวนคดี
-        if db.query(CaseFile).count() == 0 and default_user:
-            mock_cases = [
-                CaseFile(
-                    case_number_year="สว.450/2569",
-                    case_type="ขับรถในขณะเมาสุรา (เมาขับ)",
-                    accuser_name="สภ.พานทอง",
-                    suspect_name="นายมานะ เดินดี",
-                    investigator_id=default_user.user_id,
-                ),
-                CaseFile(
-                    case_number_year="สว.451/2569",
-                    case_type="เสพสารเสพติดให้โทษ (เสพ)",
-                    accuser_name="สภ.พานทอง",
-                    suspect_name="นายวิชัย ไวไว",
-                    investigator_id=default_user.user_id,
-                ),
-            ]
-            db.add_all(mock_cases)
-
-        # บันทึกธุรกรรมลงฐานข้อมูลทั้งหมดในครั้งเดียวอย่างปลอดภัย (Transaction Support)
-        db.commit()
-
-    except Exception as e:
-        db.rollback()
-        print(f"เกิดข้อผิดพลาดในการติดตั้งข้อมูลเริ่มต้น: {e}")
+            # ใส่ข้อมูล Seed Data สำนวนคดี
+            if db.query(CaseFile).count() == 0:
+                mock_cases = [
+                    CaseFile(
+                        case_number_year="สว.450/2569",
+                        case_type="ขับรถในขณะเมาสุรา (เมาขับ)",
+                        accuser_name="สภ.พานทอง",
+                        suspect_name="นายมานะ เดินดี",
+                        investigator_id=default_user.user_id,
+                    ),
+                    CaseFile(
+                        case_number_year="สว.451/2569",
+                        case_type="เสพสารเสพติดให้โทษ (เสพ)",
+                        accuser_name="สภ.พานทอง",
+                        suspect_name="นายวิชัย ไวไว",
+                        investigator_id=default_user.user_id,
+                    ),
+                ]
+                db.add_all(mock_cases)
+                db.commit()
     finally:
         db.close()
