@@ -1,0 +1,32 @@
+# Byte-compiled / optimized / DLL files (ไฟล์แคชรันระบบของ Python)
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environments (โฟลเดอร์ Virtual Environment ที่เก็บ Library)
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE / Editors Configuration (คอนฟิกส่วนตัวของโปรแกรมเขียนโค้ด)
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+
+# Operating System Files (ไฟล์ขยะของระบบปฏิบัติการ)
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+.DS_Store
+
+# PyQt6 / PySide6 specific (ถ้าคุณใช้เครื่องมือแปลงไฟล์ UI แล้วไม่อยากให้ทับซ้อน)
+# ปลดคอมเมนต์ด้านล่างนี้หากคุณต้องการเก็บเฉพาะไฟล์ .ui แล้วให้คนอื่นไปแปลงเอง
+# ui_*.py
